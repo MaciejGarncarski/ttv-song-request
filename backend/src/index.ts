@@ -1,28 +1,31 @@
-import { Elysia, t } from 'elysia'
-import { cors } from '@elysiajs/cors'
-import { logOnStart } from '@/utils/log-on-start';
-import { wrap } from '@bogeychan/elysia-logger';
-import { logger } from '@/lib/logger';
-import { env } from '@/config/env';
+import { Elysia, t } from "elysia";
+import { cors } from "@elysiajs/cors";
+import { logOnStart } from "@/utils/log-on-start";
+import { wrap } from "@bogeychan/elysia-logger";
+import { logger } from "@/lib/logger";
+import { env } from "@/config/env";
+import { ChatWebSocket } from "@/lib/chat-ws";
+import { sendChatMessage } from "@/api/send-chat-message";
 
-const app = new Elysia()
+new ChatWebSocket();
+
+export const app = new Elysia()
+  .use(wrap(logger))
   .use(
-    wrap(logger)
-  )
-.use(cors({
-    origin: env.APP_ORIGIN
-}))
-    .get('/', () => 'Hi Elysia 12322s')
-    .get('/id/:id', ({ params: { id } }) => id)
-    .post('/mirror', ({ body }) => body, {
-        body: t.Object({
-            id: t.Number(),
-            name: t.String()
-        })
+    cors({
+      origin: env.APP_ORIGIN,
     })
-    
-    .listen(env.PORT)
+  )
+  .onError(({ code, status }) => {
+    if (code === "NOT_FOUND")
+      return status(404, {
+        status: "Endpoint not found",
+      });
+  })
+  .get("/", async () => {
+    await sendChatMessage("OhMyDog Bot się odpala OhMyDog");
+    return "hi";
+  })
+  .listen(env.PORT);
 
-logOnStart()
-
-export type App = typeof app;
+logOnStart();
