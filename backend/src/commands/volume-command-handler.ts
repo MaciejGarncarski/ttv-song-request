@@ -1,6 +1,7 @@
 import { CommandHandler, Deps } from "@/commands/command";
 import { checkIsMod } from "@/helpers/check-is-mod";
 import { logger } from "@/helpers/logger";
+import { sanitizeMessage } from "@/helpers/sanitize-message";
 import { TwitchWSMessage } from "@/types/twitch-ws-message";
 import z from "zod";
 
@@ -32,14 +33,11 @@ export class VolumeCommandHandler extends CommandHandler {
         throw new Error("NOT_A_MOD");
       }
 
-      const messageText = parsedMessage.payload.event?.message?.text;
-
-      if (!messageText) {
-        throw new Error("No messageText found.");
-      }
+      const messageText = sanitizeMessage(
+        parsedMessage.payload.event?.message?.text || ""
+      );
 
       const match = messageText.match(this.regex);
-
       const messageId = parsedMessage.payload.event?.message_id;
 
       if (!match || !messageId) {
@@ -53,6 +51,7 @@ export class VolumeCommandHandler extends CommandHandler {
       }
 
       playbackManager.setVolume(volume);
+
       await sendChatMessage(
         `Ustawiono głośność na ${volume * 100}%.`,
         messageId

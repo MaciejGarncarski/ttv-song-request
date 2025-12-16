@@ -39,35 +39,37 @@ export class PlaybackManager {
     this.isPlaying = true;
     this.startedAt = Date.now() - this.playTime * 1000;
 
-    if (this.intervalId === null) {
-      this.intervalId = setInterval(async () => {
-        const currentPlayTime = this.getPlayTime();
-
-        if (
-          this.currentSongDuration > 0 &&
-          currentPlayTime >= this.currentSongDuration
-        ) {
-          logger.info("[PLAYBACK] Song ended, handling next in queue.");
-          this.handleSongEnd();
-          return;
-        }
-
-        const bunInstance = getBunServer();
-        if (!bunInstance) return;
-
-        bunInstance.publish(
-          "playback-status",
-          JSON.stringify({
-            isPlaying: this.isPlaying,
-            volume: this.volume,
-            songId: this.songId,
-            playTime: currentPlayTime,
-            startedAt: this.startedAt,
-            serverTime: Date.now(),
-          })
-        );
-      }, 1000);
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
     }
+
+    this.intervalId = setInterval(async () => {
+      const currentPlayTime = this.getPlayTime();
+
+      if (
+        this.currentSongDuration > 0 &&
+        currentPlayTime >= this.currentSongDuration
+      ) {
+        this.handleSongEnd();
+        return;
+      }
+
+      const bunInstance = getBunServer();
+      if (!bunInstance) return;
+
+      bunInstance.publish(
+        "playback-status",
+        JSON.stringify({
+          isPlaying: this.isPlaying,
+          volume: this.volume,
+          songId: this.songId,
+          playTime: currentPlayTime,
+          startedAt: this.startedAt,
+          serverTime: Date.now(),
+        })
+      );
+    }, 1000);
   }
   pause() {
     if (this.isPlaying && this.startedAt !== null) {
@@ -81,8 +83,21 @@ export class PlaybackManager {
       this.intervalId = null;
     }
 
-    const bunInstance = getBunServer();
-    if (bunInstance) {
+    this.intervalId = setInterval(async () => {
+      console.log("pause interval");
+      const currentPlayTime = this.getPlayTime();
+
+      if (
+        this.currentSongDuration > 0 &&
+        currentPlayTime >= this.currentSongDuration
+      ) {
+        this.handleSongEnd();
+        return;
+      }
+
+      const bunInstance = getBunServer();
+      if (!bunInstance) return;
+
       bunInstance.publish(
         "playback-status",
         JSON.stringify({
@@ -94,7 +109,8 @@ export class PlaybackManager {
           serverTime: Date.now(),
         })
       );
-    }
+    }, 1000);
+
     this.startedAt = null;
   }
 
@@ -114,7 +130,7 @@ export class PlaybackManager {
   }
 
   handleSongEnd() {
-    logger.info("[PLAYBACK] Current song finished playing. Advancing queue.");
+    logger.info("[PLAYBACK] Current song finished playing.");
 
     const nextSong = songQueue.next();
     const bunInstance = getBunServer();

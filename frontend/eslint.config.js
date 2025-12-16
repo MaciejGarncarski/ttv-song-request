@@ -1,5 +1,24 @@
-//  @ts-check
+import tseslint from 'typescript-eslint'
+import pluginReactHooks from 'eslint-plugin-react-hooks'
+import pluginReact from 'eslint-plugin-react'
 
-import { tanstackConfig } from '@tanstack/eslint-config'
-
-export default [...tanstackConfig]
+export default [
+  { files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'] },
+  ...tseslint.configs.recommended,
+  pluginReact.configs.flat.recommended,
+  pluginReact.configs.flat['jsx-runtime'],
+  {
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
+    plugins: {
+      'react-hooks': pluginReactHooks,
+    },
+    rules: {
+      ...pluginReactHooks.configs.recommended.rules,
+      'react/prop-types': 0,
+    },
+  },
+]

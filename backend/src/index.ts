@@ -6,6 +6,14 @@ import { ChatWebSocket, songQueue } from "@/connectors/chat-ws";
 import { sendChatMessage } from "@/api/send-chat-message";
 import { setBunServer } from "@/helpers/init-ws";
 import { playbackManager } from "@/core/playback-manager";
+import { CACHE_DIR } from "@/helpers/cache";
+import { join } from "node:path";
+import { stat } from "fs/promises";
+
+const HLS_MIME_TYPES: Record<string, string> = {
+  ".m3u8": "application/vnd.apple.mpegurl",
+  ".ts": "video/mp2t",
+};
 
 new ChatWebSocket();
 
@@ -25,11 +33,15 @@ export const app = new Elysia()
 
     if (env.NODE_ENV === "development") {
       // for convenience, add a test song on startup
-
       await songQueue.add({
         username: "maciej_ga",
-        videoUrl: "https://www.youtube.com/watch?v=TWxXXcVQevI",
-        videoId: "TWxXXcVQevI",
+        videoUrl: "https://www.youtube.com/watch?v=xuP4g7IDgDM",
+        videoId: "xuP4g7IDgDM",
+      });
+      await songQueue.add({
+        username: "maciej_ga",
+        videoUrl: "https://www.youtube.com/watch?v=XNpGNykVZ6U",
+        videoId: "XNpGNykVZ6U",
       });
     }
   })
@@ -50,15 +62,50 @@ export const app = new Elysia()
     const data = songQueue.getQueue();
     return data;
   })
-  .get("/song/:id", async ({ params, set, status }) => {
-    const id = params.id;
-    const item = songQueue.getQueue().find((item) => item.id === id);
+  .get("/stream/:videoId/:fileNameWithExt", async ({ params, set, status }) => {
+    const { videoId, fileNameWithExt } = params;
 
-    if (!item) {
-      return status(404, "Song not found");
+    if (videoId === "undefined" || fileNameWithExt === "undefined") {
+      return status(400, "Invalid videoId or fileName.");
     }
 
-    return "OK";
+    const pathWithVideoId = join(CACHE_DIR, videoId);
+    const filePath = join(pathWithVideoId, fileNameWithExt);
+
+    const ext = fileNameWithExt
+      .substring(fileNameWithExt.lastIndexOf("."))
+      .toLowerCase();
+
+    const contentType = HLS_MIME_TYPES[ext];
+
+    if (!contentType) {
+      console.error(
+        `Attempted to serve file with unsupported extension: ${ext}`
+      );
+      return status(403, "File type not supported for streaming.");
+    }
+
+    try {
+      const fileStats = await stat(filePath);
+
+      if (!fileStats.isFile()) {
+        return status(404, "File not found or is not a file.");
+      }
+
+      set.headers["Content-Type"] = contentType;
+      set.headers["Content-Length"] = fileStats.size.toString();
+
+      if (ext === ".ts") {
+        set.headers["Cache-Control"] = "public, max-age=31536000, immutable";
+      } else {
+        set.headers["Cache-Control"] = "no-cache";
+      }
+
+      return Bun.file(filePath);
+    } catch (error) {
+      console.error(`Error serving HLS file: ${filePath}`, error);
+      return status(404, "Stream segment not found.");
+    }
   })
   .post("/pause", async () => {
     playbackManager.pause();

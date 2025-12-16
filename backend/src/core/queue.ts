@@ -11,6 +11,10 @@ import {
 } from "@/types/queue";
 import { formatDuration } from "@/helpers/format-duration";
 import z from "zod";
+import { downloadYtAudioForStreaming } from "@/data/download-stream";
+import { checkIsInCache } from "@/helpers/cache";
+import { logger } from "@/helpers/logger";
+import { sendChatMessage } from "@/api/send-chat-message";
 
 export class SongQueue {
   private queue: QueuedItem[] = [];
@@ -105,16 +109,6 @@ export class SongQueue {
       requestedAt: new Date(),
     };
 
-    if (!this.currentPlaying) {
-      this.currentPlaying = newItem;
-
-      playbackManager.setSong(newItem.id, newItem.duration);
-      playbackManager.play();
-      this.queue.push(newItem);
-    } else {
-      this.queue.push(newItem);
-    }
-
     const trackedItem: QueueTrackedItem = {
       ...newItem,
       position: this.currentPlaying === newItem ? 0 : position,
@@ -125,25 +119,66 @@ export class SongQueue {
           : formatDuration(timeUntilPlay),
     };
 
+    const isInCache = checkIsInCache(validatedInput.videoId);
+
+    if (isInCache) {
+      logger.info(`[QUEUE] [CACHE] Song in cache: ${validatedInput.videoId}`);
+      if (!this.currentPlaying) {
+        this.currentPlaying = newItem;
+
+        playbackManager.setSong(newItem.id, newItem.duration);
+        playbackManager.play();
+        this.queue.push(newItem);
+      } else {
+        this.queue.push(newItem);
+      }
+
+      return trackedItem;
+    }
+
+    logger.info(`[QUEUE] [CACHE] Downloading: ${validatedInput.videoId}`);
+    await sendChatMessage(`Pobieranie audio...`);
+    await downloadYtAudioForStreaming(
+      validatedInput.videoUrl,
+      validatedInput.videoId
+    );
+
+    if (!this.currentPlaying) {
+      this.currentPlaying = newItem;
+
+      playbackManager.setSong(newItem.id, newItem.duration);
+      playbackManager.play();
+      this.queue.push(newItem);
+    } else {
+      this.queue.push(newItem);
+    }
+
     return trackedItem;
   }
 
-  public next(): QueuedItem | null {
+  public removeCurrent() {
+    playbackManager.pause();
+    const currentItem = this.currentPlaying;
+    const currentId = this.currentPlaying ? this.currentPlaying.id : "";
+
+    this.queue = this.queue.filter((item) => item.id !== currentId);
+
     if (this.queue.length === 0) {
       this.currentPlaying = null;
-      playbackManager.pause();
-      return null;
+      return currentItem;
     }
 
-    const nextSong = this.queue.shift();
-    this.currentPlaying = nextSong!;
-
+    this.currentPlaying = this.queue[0];
     playbackManager.setSong(
       this.currentPlaying.id,
       this.currentPlaying.duration
     );
     playbackManager.play();
+    return currentItem;
+  }
 
+  public next(): QueuedItem | null {
+    this.removeCurrent();
     return this.currentPlaying;
   }
 
@@ -151,7 +186,7 @@ export class SongQueue {
     const initialLength = this.queue.length;
 
     if (this.currentPlaying && this.currentPlaying.id === id) {
-      this.next();
+      this.removeCurrent();
       return true;
     }
     this.queue = this.queue.filter((item) => item.id !== id);

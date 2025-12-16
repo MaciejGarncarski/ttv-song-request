@@ -1,6 +1,6 @@
 import { getYtVideo } from "@/data/get-yt-video";
 
-const downloadAudioWithFfmpeg = async (
+export const downloadAudioWithFfmpeg = async (
   streamUrl: string,
   filename: string
 ): Promise<void> => {
