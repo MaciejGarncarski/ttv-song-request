@@ -36,19 +36,18 @@ export class YoutubeSrHandler extends CommandHandler {
 
     try {
       const added = await songQueue.add({
-        userId: user,
+        username: user,
         videoUrl: videoLink,
         videoId: videoId,
       });
 
-      const durationUntilPlay = songQueue.getDurationBeforePlayingCurrent();
+      const durationFormatted = formatDuration(added.duration);
+      const durationUntilPlay = formatDuration(
+        songQueue.getDurationBeforePlayingCurrent()
+      );
 
       await sendChatMessage(
-        `Dodano do kolejki ${videoLink} przez @${user} (długość: ${formatDuration(
-          added.duration
-        )}). Pozycja w kolejce ${
-          added.position
-        }. Odtwarzanie za ${formatDuration(durationUntilPlay)}.`,
+        `Dodano do kolejki ${videoLink} przez @${user} (długość: ${durationFormatted}). Pozycja w kolejce ${added.position}. Odtwarzanie za ${durationUntilPlay}.`,
         messageId
       );
     } catch (e) {

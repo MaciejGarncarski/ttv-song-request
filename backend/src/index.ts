@@ -27,7 +27,7 @@ export const app = new Elysia()
       // for convenience, add a test song on startup
 
       await songQueue.add({
-        userId: "maciej_ga",
+        username: "maciej_ga",
         videoUrl: "https://www.youtube.com/watch?v=TWxXXcVQevI",
         videoId: "TWxXXcVQevI",
       });

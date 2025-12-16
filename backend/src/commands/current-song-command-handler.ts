@@ -31,10 +31,10 @@ export class CurrentSongCommandHandler extends CommandHandler {
     const formatDurationToEnd = formatDuration(durationToEnd);
 
     logger.info(
-      `[COMMAND] [CURRENTSONG] Current song is ${currentSong.title} added by ${currentSong.userId}.`
+      `[COMMAND] [CURRENTSONG] Current song is ${currentSong.title} added by ${currentSong.username}.`
     );
     await sendChatMessage(
-      `Aktualny utwór to ${currentSong.title} (dodany przez @${currentSong.userId}). Pozostało do końca: ${formatDurationToEnd}.`,
+      `Aktualny utwór to ${currentSong.title} (dodany przez @${currentSong.username}). Pozostało do końca: ${formatDurationToEnd}.`,
       messageId
     );
   }

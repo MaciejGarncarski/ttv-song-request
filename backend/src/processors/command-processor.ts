@@ -1,9 +1,10 @@
-import { CommandHandler } from "@/commands/command";
+import { CommandHandler, Deps } from "@/commands/command";
 import { logger } from "@/helpers/logger";
 import { TwitchWSMessage } from "@/types/twitch-ws-message";
 import { songQueue } from "@/connectors/chat-ws";
 import { sendChatMessage } from "@/api/send-chat-message";
 import { sanitizeMessage } from "@/helpers/sanitize-message";
+import { playbackManager } from "@/core/playback-manager";
 
 class CommandProcessor {
   handlers: CommandHandler[];
@@ -25,10 +26,11 @@ class CommandProcessor {
     }
     const sanitizedMessage = sanitizeMessage(messageText);
 
-    const deps = {
+    const deps: Deps = {
       songQueue,
       logger,
       sendChatMessage,
+      playbackManager,
     };
 
     for (const handler of this.handlers) {
@@ -38,7 +40,7 @@ class CommandProcessor {
       }
 
       try {
-        logger.info(`[COMMAND] Executing handler: ${handler.constructor.name}`);
+        logger.info(`[COMMAND] [EXEC] ${handler.constructor.name}`);
         await handler.execute(parsed, deps);
         return;
       } catch (error) {

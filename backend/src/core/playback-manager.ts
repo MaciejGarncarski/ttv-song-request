@@ -24,6 +24,10 @@ export class PlaybackManager {
     this.startedAt = Date.now() - this.playTime * 1000;
   }
 
+  public getCurrentSongId() {
+    return this.songId;
+  }
+
   getPlayTime() {
     if (!this.isPlaying || this.startedAt === null) return this.playTime;
     return Math.floor((Date.now() - this.startedAt) / 1000);
@@ -38,7 +42,6 @@ export class PlaybackManager {
     if (this.intervalId === null) {
       this.intervalId = setInterval(async () => {
         const currentPlayTime = this.getPlayTime();
-        // console.log({ currentPlayTime });
 
         if (
           this.currentSongDuration > 0 &&
@@ -111,13 +114,13 @@ export class PlaybackManager {
   }
 
   handleSongEnd() {
-    logger.info("Current song finished playing. Advancing queue.");
+    logger.info("[PLAYBACK] Current song finished playing. Advancing queue.");
 
     const nextSong = songQueue.next();
     const bunInstance = getBunServer();
 
     if (nextSong) {
-      logger.info(`Next song starting: ${nextSong.title}`);
+      logger.info(`[PLAYBACK] Next song starting: ${nextSong.title}`);
 
       if (bunInstance) {
         bunInstance.publish(
@@ -135,7 +138,7 @@ export class PlaybackManager {
       return;
     }
 
-    logger.info("Queue is empty. Stopping playback.");
+    logger.info("[PLAYBACK] Queue is empty. Stopping playback.");
     this.pause();
 
     if (bunInstance) {

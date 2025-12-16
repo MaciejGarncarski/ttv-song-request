@@ -53,6 +53,14 @@ const replySchema = z.object({
   thread_user_name: z.string(),
 });
 
+export const chatBadgeSchema = z.object({
+  set_id: z.string(),
+  id: z.string(),
+  info: z.string().optional(),
+});
+
+export const badgesSchema = z.array(chatBadgeSchema).nullable().optional();
+
 export const twitchMessageSchema = z.object({
   metadata: z.object({
     message_type: z.string(),
@@ -94,7 +102,7 @@ export const twitchMessageSchema = z.object({
           text: z.string(),
           fragments: z.array(messageFragments),
         }),
-        badges: z.array(z.object()),
+        badges: badgesSchema,
         color: z.string(),
         source_badges: z.null(),
         message_type: z.string(),

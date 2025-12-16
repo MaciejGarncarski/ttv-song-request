@@ -1,4 +1,5 @@
 import { sendChatMessage } from "@/api/send-chat-message";
+import { PlaybackManager } from "@/core/playback-manager";
 import { SongQueue } from "@/core/queue";
 import { logger } from "@/helpers/logger";
 import { TwitchWSMessage } from "@/types/twitch-ws-message";
@@ -6,6 +7,7 @@ import { TwitchWSMessage } from "@/types/twitch-ws-message";
 export type Deps = {
   songQueue: SongQueue;
   logger: typeof logger;
+  playbackManager: PlaybackManager;
   sendChatMessage: typeof sendChatMessage;
 };
 

@@ -19,13 +19,12 @@ export class QueueCommandHandler extends CommandHandler {
     }
 
     const queueItems = songQueue.getQueue();
-    console.log(queueItems);
     const messageId = parsedMessage.payload.event?.message_id;
 
     const formattedQueue = queueItems
       .map(
         (item, index) =>
-          `${index + 1}. ${item.title} (dodany przez @${item.userId})`
+          `${index + 1}. ${item.title} (dodany przez @${item.username})`
       )
       .join("\n");
 

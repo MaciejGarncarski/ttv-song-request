@@ -1,8 +1,11 @@
 import { CurrentSongCommandHandler } from "@/commands/current-song-command-handler";
+import { GithubCommandHandler } from "@/commands/github-commang-handler";
 import { HelpCommandHandler } from "@/commands/help-command-handler";
 import { QueueCommandHandler } from "@/commands/quque-command-handler";
 import { SkipCommandHandler } from "@/commands/skip-command-handler";
 import { YoutubeSrHandler } from "@/commands/sr-command-handler";
+import { VolumeCommandHandler } from "@/commands/volume-command-handler";
+import { WrongSongCommandHandler } from "@/commands/wrong-song-command-handler";
 import {
   subscribeToChat,
   unsubscribeAll,
@@ -18,6 +21,9 @@ const commandHandlers = [
   new SkipCommandHandler(),
   new CurrentSongCommandHandler(),
   new QueueCommandHandler(),
+  new VolumeCommandHandler(),
+  new WrongSongCommandHandler(),
+  new GithubCommandHandler(),
   new HelpCommandHandler(),
 ];
 const processor = new CommandProcessor(commandHandlers);
@@ -38,7 +44,6 @@ export class ChatWebSocket {
 
   async handleMessage(data: string) {
     const parsed = twitchMessageSchema.parse(JSON.parse(data));
-
     if (parsed?.payload?.session?.id) {
       if (!this.sessionId) {
         await subscribeToChat(parsed.payload.session.id);

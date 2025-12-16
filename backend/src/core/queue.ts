@@ -22,9 +22,11 @@ export class SongQueue {
   }
 
   public getDurationBeforePlayingCurrent(): number {
-    // 10s in
-    // 200, 130, 20
-    return this.queue.reduce((total, item) => total + item.duration, 0);
+    const combinedDurationWithoutLast = this.queue
+      .slice(0, -1)
+      .reduce((total, item) => total + item.duration, 0);
+
+    return combinedDurationWithoutLast - playbackManager.getPlayTime();
   }
 
   public getQueue(): QueueTrackedItem[] {
@@ -66,17 +68,6 @@ export class SongQueue {
     return !!isQueued || !!isCurrent;
   }
 
-  private getTotalDuration(): number {
-    const queueDuration = this.queue.reduce(
-      (total, item) => total + item.duration,
-      0
-    );
-    const currentDuration = this.currentPlaying
-      ? this.currentPlaying.duration
-      : 0;
-    return queueDuration + currentDuration;
-  }
-
   public async add(
     input: z.infer<typeof songRequestInputSchema>
   ): Promise<QueueTrackedItem> {
@@ -106,7 +97,7 @@ export class SongQueue {
 
     const newItem: QueuedItem = {
       id: validatedInput.videoId,
-      userId: validatedInput.userId,
+      username: validatedInput.username,
       videoUrl: validatedInput.videoUrl,
       duration: duration,
       title: title,
@@ -156,7 +147,7 @@ export class SongQueue {
     return this.currentPlaying;
   }
 
-  public remove(id: string): boolean {
+  public removeSongById(id: string): boolean {
     const initialLength = this.queue.length;
 
     if (this.currentPlaying && this.currentPlaying.id === id) {
