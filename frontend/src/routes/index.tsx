@@ -6,10 +6,10 @@ import useWebSocket from 'react-use-websocket'
 import { useVolume } from '@/hooks/use-volume'
 import { usePlayState } from '@/hooks/use-play-state'
 import { useHls } from '@/hooks/use-hls'
-import { formatDuration } from '@/utils/format-duration'
 import { AnimatePresence, motion } from 'motion/react'
 import { api } from '@/api/api-treaty'
 import { Player } from '@/components/player'
+import { Queue } from '@/components/queue'
 
 const playbackSchema = z
   .object({
@@ -62,7 +62,7 @@ function App() {
 
   return (
     <div className="text-center bg-neutral-900 text-white min-h-screen max-w-2xl mx-auto px-8 py-10">
-      <div className="flex flex-col gap-4 items-center">
+      <div className="flex flex-col gap-4 items-center h-67">
         <AnimatePresence mode="wait">
           {isLoading ? (
             <motion.p className="py-28 text-2xl">Ładowanie...</motion.p>
@@ -78,60 +78,10 @@ function App() {
         </AnimatePresence>
       </div>
 
-      <div className="flex flex-col px-2">
-        <h2 className="mr-auto ml-2 pb-2 text-lg font-semibold">Kolejka</h2>
-        <div className="border rounded-lg border-neutral-700 overflow-hidden min-h-56">
-          <AnimatePresence>
-            {queueData?.map((item, idx) => (
-              <motion.div
-                layout
-                key={item.id}
-                exit={{
-                  opacity: 0,
-                  translateY: 0,
-                  translateX: -100,
-                  transition: { duration: 0.3 },
-                }}
-                initial={{
-                  opacity: 0,
-                  translateY: 20,
-                  translateX: 0,
-                  transition: { duration: 0.3 },
-                }}
-                animate={{
-                  opacity: 1,
-                  translateY: 0,
-                  translateX: 0,
-                  transition: { duration: 0.3 },
-                }}
-                className="p-4 border-b border-neutral-700 bg-neutral-800 flex gap-4 items-center"
-              >
-                {item.thumbnail && (
-                  <a href={item.videoUrl} target="_blank" rel="noopener noreferrer">
-                    <img
-                      src={item.thumbnail}
-                      alt={item.title}
-                      className="h-16 object-cover  rounded border border-neutral-500"
-                    />
-                  </a>
-                )}
-                <div className="text-left">
-                  <div className="font-semibold">
-                    {item.title} | Dodano przez @{item.username}
-                  </div>
-                  <div className="text-gray-400 text-sm">
-                    Czas trwania: {formatDuration(item.duration)}
-                    {idx === 0 && ' | (Aktualnie odtwarzane)'}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
+      <Queue />
 
-        <div className="">
-          <video ref={videoRef} />
-        </div>
+      <div className="">
+        <video ref={videoRef} />
       </div>
     </div>
   )
