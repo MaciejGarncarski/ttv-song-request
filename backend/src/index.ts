@@ -9,6 +9,7 @@ import { playbackManager } from "@/core/playback-manager";
 import { CACHE_DIR } from "@/helpers/cache";
 import { join } from "node:path";
 import { stat } from "fs/promises";
+import { logger } from "@/helpers/logger";
 
 const HLS_MIME_TYPES: Record<string, string> = {
   ".m3u8": "application/vnd.apple.mpegurl",
@@ -121,22 +122,17 @@ export const app = new Elysia()
   })
   .ws("/ws", {
     open(ws) {
-      console.log("New WebSocket connection established.");
       ws.subscribe("playback-status");
     },
-    message(ws, msg) {
-      console.log(msg);
-    },
-    close(ws, code, reason) {
-      console.log(`WebSocket connection closed: ${code} - ${reason}`);
-    },
+    message(ws, msg) {},
+    close(ws, code, reason) {},
   })
   .listen({ port: env.PORT || 3001 });
 
 process.on("SIGINT", () => {
-  console.log("Received SIGINT. Stopping server...");
+  logger.info("Received SIGINT. Stopping server...");
   app.stop().then(() => {
-    console.log("Server stopped");
+    logger.info("Server stopped");
     process.exit(0);
   });
 });

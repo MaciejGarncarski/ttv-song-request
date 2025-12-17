@@ -18,7 +18,6 @@ export class SkipCommandHandler extends CommandHandler {
 
       if (songQueue.isEmpty()) {
         logger.info(`[COMMAND] [SKIP] Queue is empty, skipping not possible.`);
-        console.log("HERE");
         await sendChatMessage(`Kolejka jest pusta.`, messageId);
         return;
       }
@@ -56,7 +55,6 @@ export class SkipCommandHandler extends CommandHandler {
         return;
       }
 
-      console.log("HERE2");
       await sendChatMessage(`Kolejka jest pusta.`, messageId);
     } catch (error) {
       if (error instanceof Error) {

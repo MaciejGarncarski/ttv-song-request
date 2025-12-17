@@ -50,7 +50,7 @@ export const Player = ({ currentSong, playbackData }: PlayerProps) => {
 
       <div className="flex flex-col justify-between gap-4 w-full">
         <div className="flex justify-between items-center">
-          <p className="text-xl font-semibold">{currentSong.title}</p>
+          <p className="text-xl font-semibold max-w-[24ch] truncate">{currentSong.title}</p>
           <p>Głośność: {Math.round(playbackData?.volume * 100) || 0}%</p>
         </div>
         <div className="flex gap-2 justify-between items-center">

@@ -56,13 +56,13 @@ function App() {
 
   useHls(videoRef, playbackData?.songId || null)
   usePlayState(videoRef, playbackData?.playTime || 0, playbackData?.isPlaying || false)
-  useVolume(videoRef, playbackData?.volume ?? 1)
+  useVolume(videoRef, playbackData?.volume ?? 0.2)
 
   const currentSong = queueData?.find((item) => item.id === playbackData?.songId)
 
   return (
-    <div className="text-center bg-neutral-900 text-white min-h-screen max-w-2xl mx-auto px-8 py-10">
-      <div className="flex flex-col gap-4 items-center h-67">
+    <div className="text-center min-h-screen max-w-2xl mx-auto px-8 py-10">
+      <div className="flex flex-col gap-4 items-center h-40">
         <AnimatePresence mode="wait">
           {isLoading ? (
             <motion.p className="py-28 text-2xl">Ładowanie...</motion.p>

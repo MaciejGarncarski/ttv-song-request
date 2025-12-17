@@ -1,12 +1,13 @@
 import { getYtVideo } from "@/data/get-yt-video";
 import { downloadAndSegmentAudio } from "@/data/segment-audio";
+import { logger } from "@/helpers/logger";
 
 export const downloadYtAudioForStreaming = async (
   videoUrl: string,
   outputFilenameBase: string
 ): Promise<string | undefined> => {
   try {
-    console.log(`\n⏳ Fetching audio stream URL for: ${videoUrl}`);
+    logger.info(`[DOWNLOAD] Fetching audio stream URL ${videoUrl}`);
     const streamUrl = await getYtVideo(videoUrl);
 
     const manifestPath = await downloadAndSegmentAudio(
@@ -17,7 +18,9 @@ export const downloadYtAudioForStreaming = async (
     return manifestPath;
   } catch (error) {
     if (error instanceof Error) {
-      console.error(`\n❌ Failed to process YouTube audio:`, error.message);
+      logger.error(
+        `[DOWNLOAD] Failed to process YouTube audio: ${error.message}`
+      );
     }
   }
   return undefined;

@@ -23,7 +23,7 @@ export const Queue = () => {
       <h2 className="mr-auto ml-1 pb-2 text-lg font-semibold">Kolejka</h2>
       <div className="border rounded-lg border-neutral-700 overflow-hidden min-h-56">
         <AnimatePresence>
-          {queueData?.map((item, idx) => (
+          {queueData?.map((item) => (
             <motion.div
               layout
               key={item.id}
@@ -48,21 +48,23 @@ export const Queue = () => {
               className="p-4 border-b border-neutral-700 bg-neutral-800 flex gap-4 items-center"
             >
               {item.thumbnail && (
-                <a href={item.videoUrl} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={item.videoUrl}
+                  target="_blank"
+                  className="shrink-0"
+                  rel="noopener noreferrer"
+                >
                   <img
                     src={item.thumbnail}
                     alt={item.title}
-                    className="h-16 object-cover  rounded border border-neutral-500"
+                    className="h-16 w-auto object-cover rounded border border-neutral-500"
                   />
                 </a>
               )}
               <div className="text-left">
-                <div className="font-semibold">
-                  {item.title} | Dodano przez @{item.username}
-                </div>
+                <div className="font-semibold">{item.title}</div>
                 <div className="text-gray-400 text-sm">
-                  Czas trwania: {formatDuration(item.duration)}
-                  {idx === 0 && ' | (Aktualnie odtwarzane)'}
+                  Czas trwania: {formatDuration(item.duration)} | Dodano przez @{item.username}
                 </div>
               </div>
             </motion.div>

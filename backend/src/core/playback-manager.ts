@@ -3,19 +3,13 @@ import { logger } from "@/helpers/logger";
 import { getBunServer } from "@/helpers/init-ws";
 
 export class PlaybackManager {
-  private isPlaying: boolean;
-  private volume: number;
-  private playTime: number;
+  private isPlaying: boolean = false;
+  private volume: number = 0.2;
+  private playTime: number = 0;
   private startedAt: number | null = null;
   private intervalId: NodeJS.Timeout | null = null;
   private songId: string | null = null;
   private currentSongDuration: number = 0;
-
-  constructor() {
-    this.isPlaying = false;
-    this.volume = 1.0;
-    this.playTime = 0;
-  }
 
   public setSong(songId: string, duration: number) {
     this.songId = songId;

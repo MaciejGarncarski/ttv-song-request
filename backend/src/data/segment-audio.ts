@@ -1,6 +1,7 @@
 import { join } from "node:path";
 import { mkdir } from "fs/promises";
 import { CACHE_DIR } from "@/helpers/cache";
+import { logger } from "@/helpers/logger";
 
 export const downloadAndSegmentAudio = async (
   videoUrl: string,
@@ -25,7 +26,7 @@ export const downloadAndSegmentAudio = async (
     "-c:a",
     "aac",
     "-b:a",
-    "128k",
+    "256k",
     "-f",
     "hls",
     "-hls_time",
@@ -37,7 +38,9 @@ export const downloadAndSegmentAudio = async (
   ];
 
   try {
-    console.log(`\nStarting HLS segmentation to: ${manifestPath}`);
+    logger.info(
+      `[STREAM] Starting HLS segmentation for stream URL ${videoUrl}`
+    );
     const process = Bun.spawn(command, {
       stdout: "inherit",
       stderr: "inherit",
@@ -49,11 +52,13 @@ export const downloadAndSegmentAudio = async (
       throw new Error(`ffmpeg failed HLS segmentation. Exit code: ${exitCode}`);
     }
 
-    console.log(`✅ HLS segmentation complete. Manifest file: ${manifestPath}`);
+    logger.info(
+      `[STREAM] ✅ HLS segmentation complete. Manifest file: ${manifestPath}`
+    );
     return manifestPath;
   } catch (error) {
     if (error instanceof Error)
-      console.error(`\n❌ Segmentation process failed:`, error.message);
+      logger.error(`[STREAM] ❌ Segmentation process failed: ${error.message}`);
     throw error;
   }
 };
