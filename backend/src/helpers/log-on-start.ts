@@ -1,4 +1,3 @@
-import { sendChatMessage } from "@/api/send-chat-message";
 import { env } from "@/config/env";
 import { logger } from "@/helpers/logger";
 

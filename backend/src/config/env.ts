@@ -15,9 +15,10 @@ const envSchema = z.object({
     ])
     .default("development"),
   TWITCH_CLIENT_ID: z.string(),
-  TWITCH_OAUTH_TOKEN: z.string(),
+  TWITCH_CLIENT_SECRET: z.string(),
+  TWITCH_REFRESH_TOKEN: z.string(),
+  TWITCH_ACCESS_TOKEN: z.string(),
   TWITCH_BROADCASTER_ID: z.string(),
-  TWITCH_USER_ID: z.string(),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

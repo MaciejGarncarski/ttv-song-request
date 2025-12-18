@@ -1,15 +1,10 @@
 import { env } from "@/config/env";
+import { twitchAuth } from "@/core/twitch-auth-manager";
 import { logger } from "@/helpers/logger";
 
 export async function unsubscribeAll() {
-  const res = await fetch(
-    "https://api.twitch.tv/helix/eventsub/subscriptions",
-    {
-      headers: {
-        Authorization: `Bearer ${env.TWITCH_OAUTH_TOKEN}`,
-        "Client-Id": env.TWITCH_CLIENT_ID,
-      },
-    }
+  const res = await twitchAuth.fetch(
+    "https://api.twitch.tv/helix/eventsub/subscriptions"
   );
 
   const data = await res.json();
@@ -20,14 +15,10 @@ export async function unsubscribeAll() {
 }
 
 async function unsubscribe(subscriptionId: string) {
-  const res = await fetch(
+  const res = await twitchAuth.fetch(
     `https://api.twitch.tv/helix/eventsub/subscriptions?id=${subscriptionId}`,
     {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${env.TWITCH_OAUTH_TOKEN}`,
-        "Client-Id": env.TWITCH_CLIENT_ID,
-      },
     }
   );
 
@@ -40,13 +31,11 @@ async function unsubscribe(subscriptionId: string) {
 }
 
 export async function subscribeToChat(sessId: string) {
-  const res = await fetch(
+  const res = await twitchAuth.fetch(
     "https://api.twitch.tv/helix/eventsub/subscriptions",
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${env.TWITCH_OAUTH_TOKEN}`,
-        "Client-Id": env.TWITCH_CLIENT_ID,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -54,7 +43,7 @@ export async function subscribeToChat(sessId: string) {
         version: "1",
         condition: {
           broadcaster_user_id: env.TWITCH_BROADCASTER_ID,
-          user_id: env.TWITCH_USER_ID,
+          user_id: twitchAuth.userId,
         },
         transport: {
           method: "websocket",

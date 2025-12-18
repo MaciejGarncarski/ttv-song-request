@@ -30,27 +30,24 @@ export const Queue = () => {
     >
       <h2 className="mr-auto ml-1 pb-2 text-lg font-semibold text-neutral-300">Kolejka</h2>
       <div className="border rounded-lg min-h-26 overflow-hidden">
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="popLayout">
           {filteredCurrent?.map((item, idx) => (
             <motion.div
               layout
               key={item.id}
               exit={{
                 opacity: 0,
-                translateY: 0,
-                translateX: -100,
+                translateY: 20,
                 transition: { duration: 0.3 },
               }}
               initial={{
                 opacity: 0,
                 translateY: 20,
-                translateX: 0,
                 transition: { duration: 0.3 },
               }}
               animate={{
                 opacity: 1,
                 translateY: 0,
-                translateX: 0,
                 transition: { duration: 0.3 },
               }}
               className={cn(

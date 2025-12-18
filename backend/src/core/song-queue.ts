@@ -209,8 +209,11 @@ export class SongQueue {
       this.removeCurrent();
       return true;
     }
+    const foundElement = this.queue.find((item) => item.id === id);
+    if (foundElement) {
+      this.historyQueue.push(foundElement);
+    }
     this.queue = this.queue.filter((item) => item.id !== id);
-
     return this.queue.length < initialLength;
   }
 }
