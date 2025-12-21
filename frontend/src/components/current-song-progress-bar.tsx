@@ -13,7 +13,7 @@ export function CurrentSongProgressBar({
     <div className="h-2 rounded-sm w-full overflow-hidden border bg-neutral-800">
       <motion.div
         className="bg-white h-full origin-left"
-        initial={false}
+        initial={{ scaleX: 0 }}
         animate={{
           scaleX: progress,
         }}
