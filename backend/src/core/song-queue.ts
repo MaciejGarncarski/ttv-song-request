@@ -137,7 +137,7 @@ export class SongQueue {
           : formatDuration(timeUntilPlay),
     };
 
-    logger.info(`[QUEUE] [PLAYING-FROM-YT]`);
+    logger.info(`[QUEUE] [PLAYING-FROM-YT] [${newItem.title}]`);
     if (!this.currentPlaying) {
       this.currentPlaying = newItem;
 
@@ -149,42 +149,6 @@ export class SongQueue {
     }
 
     return trackedItem;
-
-    // TODO: clean up for v2
-    // const isInCache = checkIsInCache(validatedInput.videoId);
-
-    // if (isInCache) {
-    //   logger.info(`[QUEUE] [CACHE] Song in cache: ${validatedInput.videoId}`);
-    //   if (!this.currentPlaying) {
-    //     this.currentPlaying = newItem;
-
-    //     playbackManager.setSong(newItem.id, newItem.duration);
-    //     playbackManager.play();
-    //     this.queue.push(newItem);
-    //   } else {
-    //     this.queue.push(newItem);
-    //   }
-
-    //   return trackedItem;
-    // }
-
-    // logger.info(`[QUEUE] [CACHE] Downloading: ${validatedInput.videoId}`);
-    // await downloadYtAudioForStreaming(
-    //   validatedInput.videoUrl,
-    //   validatedInput.videoId
-    // );
-
-    // if (!this.currentPlaying) {
-    //   this.currentPlaying = newItem;
-
-    //   playbackManager.setSong(newItem.id, newItem.duration);
-    //   playbackManager.play();
-    //   this.queue.push(newItem);
-    // } else {
-    //   this.queue.push(newItem);
-    // }
-
-    // return trackedItem;
   }
 
   public removeCurrent() {
