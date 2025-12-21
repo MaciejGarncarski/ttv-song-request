@@ -45,7 +45,6 @@ export function PlayerYT({ currentSong, playbackData, playerRef, setIsReady }: P
         }, 1500)
       }}
       onError={(e) => {
-        console.log('LOG LOG LOG')
         console.error('ReactPlayer Error:', e)
         setIsMuted(true)
         setTimeout(() => {

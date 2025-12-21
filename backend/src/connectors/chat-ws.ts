@@ -61,7 +61,6 @@ export class ChatWebSocket {
     this.ws = ws;
 
     ws.addEventListener("message", async ({ data }) => {
-      console.log("MESSAGE", data);
       this.resetKeepaliveTimer();
       await this.handleMessage(data.toString(), ws);
     });
@@ -107,12 +106,10 @@ export class ChatWebSocket {
         if (!newSessionId) return;
 
         this.sessionId = newSessionId;
-
         this.ws = socketContext;
 
         logger.info(`[CHAT WS] Connected. Session ID: ${newSessionId}`);
 
-        console.log("WELCOME");
         this.resetKeepaliveTimer();
 
         if (this.isTransferring) {
