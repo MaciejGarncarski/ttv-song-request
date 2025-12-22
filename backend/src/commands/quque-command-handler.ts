@@ -1,4 +1,4 @@
-import { CommandHandler, Deps } from "@/commands/command";
+import { CommandHandler, Deps, ExecuteParams } from "@/commands/command";
 import { TwitchWSMessage } from "@/types/twitch-ws-message";
 
 export class QueueCommandHandler extends CommandHandler {
@@ -8,18 +8,17 @@ export class QueueCommandHandler extends CommandHandler {
     return this.regex.test(messageText);
   }
 
-  async execute(
-    parsedMessage: TwitchWSMessage,
-    { songQueue, logger, sendChatMessage }: Deps
-  ) {
+  async execute({
+    deps: { logger, songQueue, sendChatMessage },
+    messageId,
+  }: ExecuteParams) {
     if (songQueue.isEmpty()) {
       logger.info(`[COMMAND] [QUEUE] Queue is empty.`);
-      await sendChatMessage(`Kolejka jest pusta.`);
+      await sendChatMessage(`Kolejka jest pusta.`, messageId);
       return;
     }
 
     const queueItems = songQueue.getQueue();
-    const messageId = parsedMessage.payload.event?.message_id;
 
     const formattedQueue = queueItems
       .map(

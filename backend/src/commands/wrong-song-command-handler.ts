@@ -1,5 +1,4 @@
-import { CommandHandler, Deps } from "@/commands/command";
-import { TwitchWSMessage } from "@/types/twitch-ws-message";
+import { CommandHandler, ExecuteParams } from "@/commands/command";
 
 export class WrongSongCommandHandler extends CommandHandler {
   private readonly regexp = /^!wrongsong\b/i;
@@ -8,32 +7,28 @@ export class WrongSongCommandHandler extends CommandHandler {
     return this.regexp.test(message);
   }
 
-  async execute(
-    parsedMessage: TwitchWSMessage,
-    { logger, sendChatMessage, songQueue, playbackManager }: Deps
-  ) {
+  async execute({
+    deps: { logger, songQueue, sendChatMessage, playbackManager },
+    payload,
+    messageId,
+  }: ExecuteParams) {
     const foundSoung = songQueue
       .getQueue()
-      .findLast(
-        (item) =>
-          item.username === parsedMessage.payload.event?.chatter_user_name
-      );
+      .findLast((item) => item.username === payload.event?.chatter_user_name);
 
     if (!foundSoung) {
       logger.info(
-        `[COMMAND] [WRONGSONG] No song found for user ${parsedMessage.payload.event?.chatter_user_login}.`
+        `[COMMAND] [WRONGSONG] No song found for user ${payload.event?.chatter_user_login}.`
       );
       return;
     }
 
-    const messageId = parsedMessage.payload.event?.message_id;
-
     if (playbackManager.getCurrentSongId() === foundSoung.id) {
       logger.info(
-        `[COMMAND] [WRONGSONG] User ${parsedMessage.payload.event?.chatter_user_login} tried to skip currently playing song, which is not allowed.`
+        `[COMMAND] [WRONGSONG] User ${payload.event?.chatter_user_login} tried to skip currently playing song, which is not allowed.`
       );
       await sendChatMessage(
-        `@${parsedMessage.payload.event?.chatter_user_login} Nie możesz pominąć odtwarzanego utworu.`,
+        `@${payload.event?.chatter_user_login} Nie możesz pominąć odtwarzanego utworu.`,
         messageId
       );
 
@@ -42,7 +37,7 @@ export class WrongSongCommandHandler extends CommandHandler {
 
     songQueue.removeSongById(foundSoung.id);
     logger.info(
-      `[COMMAND] [WRONGSONG] Removed song with ID ${foundSoung.id} for user ${parsedMessage.payload.event?.chatter_user_login}.`
+      `[COMMAND] [WRONGSONG] Removed song with ID ${foundSoung.id} for user ${payload.event?.chatter_user_login}.`
     );
     await sendChatMessage(`Usunięto z kolejki.`, messageId);
   }

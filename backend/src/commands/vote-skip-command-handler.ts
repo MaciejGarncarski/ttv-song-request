@@ -1,5 +1,4 @@
-import { CommandHandler, Deps } from "@/commands/command";
-import { TwitchWSMessage } from "@/types/twitch-ws-message";
+import { CommandHandler, ExecuteParams } from "@/commands/command";
 
 export class VoteSkipCommandHandler extends CommandHandler {
   private readonly regex = /^!voteskip\s*$/i;
@@ -8,11 +7,11 @@ export class VoteSkipCommandHandler extends CommandHandler {
     return this.regex.test(messageText);
   }
 
-  async execute(
-    parsedMessage: TwitchWSMessage,
-    { songQueue, logger, sendChatMessage, voteManager }: Deps
-  ) {
-    const username = parsedMessage.payload.event?.chatter_user_name;
+  async execute({
+    deps: { logger, songQueue, sendChatMessage, voteManager },
+    payload,
+  }: ExecuteParams) {
+    const username = payload.event?.chatter_user_name;
     if (!username) {
       throw new Error("Missing user information.");
     }
@@ -21,10 +20,7 @@ export class VoteSkipCommandHandler extends CommandHandler {
       logger.info(
         `[COMMAND] [VOTESKIP] Queue is empty, skipping not possible.`
       );
-      await sendChatMessage(
-        `Kolejka jest pusta.`,
-        parsedMessage.payload.event?.message_id
-      );
+      await sendChatMessage(`Kolejka jest pusta.`, payload.event?.message_id);
       return;
     }
 
@@ -43,7 +39,7 @@ export class VoteSkipCommandHandler extends CommandHandler {
     if (votesLeft > 0) {
       await sendChatMessage(
         `[VOTESKIP] [${votesCount}/${voteManager.getVotesNeeded()}] @${username} zagłosował za pominięciem utworu.`,
-        parsedMessage.payload.event?.message_id
+        payload.event?.message_id
       );
       return;
     }
@@ -59,13 +55,10 @@ export class VoteSkipCommandHandler extends CommandHandler {
           `[VOTESKIP] [${votesCount}/${voteManager.getVotesNeeded()}] Pominięto utwór ${
             skippedSong.title
           } (dodany przez @${skippedSong.username}).`,
-          parsedMessage.payload.event?.message_id
+          payload.event?.message_id
         );
       } else {
-        await sendChatMessage(
-          `Kolejka jest pusta.`,
-          parsedMessage.payload.event?.message_id
-        );
+        await sendChatMessage(`Kolejka jest pusta.`, payload.event?.message_id);
       }
       return;
     }

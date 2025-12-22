@@ -6,16 +6,8 @@ import { ChatWebSocket, songQueue } from "@/connectors/chat-ws";
 import { sendChatMessage } from "@/api/send-chat-message";
 import { setBunServer } from "@/helpers/init-ws";
 import { playbackManager } from "@/core/playback-manager";
-import { CACHE_DIR } from "@/helpers/cache";
-import { join } from "node:path";
-import { stat } from "fs/promises";
 import { logger } from "@/helpers/logger";
 import { twitchAuth } from "@/core/twitch-auth-manager";
-
-const HLS_MIME_TYPES: Record<string, string> = {
-  ".m3u8": "application/vnd.apple.mpegurl",
-  ".ts": "video/mp2t",
-};
 
 async function init() {
   await twitchAuth.fetchUserId();

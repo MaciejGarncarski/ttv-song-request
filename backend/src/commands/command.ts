@@ -3,7 +3,7 @@ import { PlaybackManager } from "@/core/playback-manager";
 import { SongQueue } from "@/core/song-queue";
 import { VoteManager } from "@/core/vote-manager";
 import { logger } from "@/helpers/logger";
-import { TwitchWSMessage } from "@/types/twitch-ws-message";
+import { TwitchMessagePayload } from "@/types/twitch-ws-message";
 
 export type Deps = {
   songQueue: SongQueue;
@@ -13,12 +13,19 @@ export type Deps = {
   sendChatMessage: typeof sendChatMessage;
 };
 
+export type ExecuteParams = {
+  payload: TwitchMessagePayload;
+  deps: Deps;
+  messageId: string | undefined;
+  sanitizedMessage: string;
+};
+
 export abstract class CommandHandler {
   canHandle(messageText: string): boolean {
-    throw new Error("Metoda canHandle musi być zaimplementowana.");
+    throw new Error("Method canHandle has not been implemented.");
   }
 
-  async execute(parsedMessage: TwitchWSMessage, deps: Deps) {
-    throw new Error("Metoda execute musi być zaimplementowana.");
+  async execute(data: ExecuteParams): Promise<void> {
+    throw new Error("Method execute has not been implemented.");
   }
 }

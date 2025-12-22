@@ -1,9 +1,6 @@
-import { CommandHandler, Deps } from "@/commands/command";
+import { CommandHandler, ExecuteParams } from "@/commands/command";
 import { checkIsMod } from "@/helpers/check-is-mod";
-import { logger } from "@/helpers/logger";
-import { sanitizeMessage } from "@/helpers/sanitize-message";
 import { CommandError, CommandErrorCode } from "@/types/errors";
-import { TwitchWSMessage } from "@/types/twitch-ws-message";
 
 export class VolumeCommandHandler extends CommandHandler {
   private readonly regex = /^!volume(?:\s+(100|[1-9]?\d))?\s*$/;
@@ -12,13 +9,12 @@ export class VolumeCommandHandler extends CommandHandler {
     return this.regex.test(messageText);
   }
 
-  async execute(
-    parsedMessage: TwitchWSMessage,
-    { playbackManager, sendChatMessage }: Deps
-  ) {
-    const messageId = parsedMessage.payload.event?.message_id;
-    const payload = parsedMessage.payload;
-
+  async execute({
+    deps: { playbackManager, sendChatMessage },
+    payload,
+    sanitizedMessage,
+    messageId,
+  }: ExecuteParams) {
     if (!payload.event) {
       throw new Error("No event found in payload.");
     }
@@ -33,11 +29,7 @@ export class VolumeCommandHandler extends CommandHandler {
       throw new CommandError(CommandErrorCode.NOT_A_MOD);
     }
 
-    const messageText = sanitizeMessage(
-      parsedMessage.payload.event?.message?.text || ""
-    );
-
-    const match = messageText.match(this.regex);
+    const match = sanitizedMessage.match(this.regex);
     const isSetVolumeCommand = match ? match[1] !== undefined : false;
 
     if (!isSetVolumeCommand) {

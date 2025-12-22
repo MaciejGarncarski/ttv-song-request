@@ -1,4 +1,4 @@
-import { CommandHandler, Deps } from "@/commands/command";
+import { CommandHandler, Deps, ExecuteParams } from "@/commands/command";
 import { formatDuration } from "@/helpers/format-duration";
 import { TwitchWSMessage } from "@/types/twitch-ws-message";
 
@@ -9,11 +9,10 @@ export class NextInfoCommandHandler extends CommandHandler {
     return this.regex.test(messageText);
   }
 
-  async execute(
-    parsedMessage: TwitchWSMessage,
-    { songQueue, logger, sendChatMessage }: Deps
-  ) {
-    const messageId = parsedMessage.payload.event?.message_id;
+  async execute({
+    deps: { songQueue, sendChatMessage, logger },
+    messageId,
+  }: ExecuteParams) {
     const nextSong = songQueue.peekNext();
 
     const timeUntilPlay = songQueue.getDurationBeforePlayingNext();

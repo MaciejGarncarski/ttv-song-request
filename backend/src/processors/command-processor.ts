@@ -26,6 +26,7 @@ class CommandProcessor {
       logger.warn("[COMMAND] Received message without text.");
       return;
     }
+
     const sanitizedMessage = sanitizeMessage(messageText);
 
     const deps: Deps = {
@@ -44,7 +45,12 @@ class CommandProcessor {
 
       try {
         logger.info(`[COMMAND] [EXEC] ${handler.constructor.name}`);
-        await handler.execute(parsed, deps);
+        await handler.execute({
+          payload: parsed.payload,
+          deps,
+          sanitizedMessage,
+          messageId: parsed.payload.event?.message_id,
+        });
         return;
       } catch (error) {
         const messageId = parsed.payload.event?.message_id;
@@ -59,7 +65,9 @@ class CommandProcessor {
               break;
 
             default:
-              logger.error(`[COMMAND] Unhandled CommandError: ${error.code}`);
+              logger.error(
+                `[COMMAND] [ERROR] ${handler.constructor.name} Unhandled CommandError: ${error.code}`
+              );
           }
 
           return;
@@ -67,7 +75,7 @@ class CommandProcessor {
 
         if (error instanceof Error) {
           logger.error(
-            `[COMMAND] [EXEC] ${handler.constructor.name} Error executing command: ${error.message}`
+            `[COMMAND] [ERROR] ${handler.constructor.name} Error executing command: ${error.message}`
           );
         }
       }

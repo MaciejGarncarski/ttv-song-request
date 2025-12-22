@@ -1,7 +1,6 @@
-import { CommandHandler, Deps } from "@/commands/command";
+import { CommandHandler, ExecuteParams } from "@/commands/command";
 import { checkIsMod } from "@/helpers/check-is-mod";
 import { CommandError, CommandErrorCode } from "@/types/errors";
-import { TwitchWSMessage } from "@/types/twitch-ws-message";
 
 export class SkipCommandHandler extends CommandHandler {
   private readonly regex = /^!skip\s*$/i;
@@ -10,18 +9,16 @@ export class SkipCommandHandler extends CommandHandler {
     return this.regex.test(messageText);
   }
 
-  async execute(
-    parsedMessage: TwitchWSMessage,
-    { songQueue, logger, sendChatMessage }: Deps
-  ) {
-    const messageId = parsedMessage.payload.event?.message_id;
-
+  async execute({
+    deps: { logger, songQueue, sendChatMessage },
+    payload,
+    messageId,
+  }: ExecuteParams) {
     if (songQueue.isEmpty()) {
       logger.info(`[COMMAND] [SKIP] Queue is empty, skipping not possible.`);
       await sendChatMessage(`Kolejka jest pusta.`, messageId);
       return;
     }
-    const payload = parsedMessage.payload;
 
     if (!payload.event) {
       throw new Error("No event found in payload.");
@@ -37,7 +34,7 @@ export class SkipCommandHandler extends CommandHandler {
       throw new CommandError(CommandErrorCode.NOT_A_MOD);
     }
 
-    const user = parsedMessage.payload.event?.chatter_user_name;
+    const user = payload.event?.chatter_user_name;
 
     if (!user) {
       throw new Error("Missing user information.");

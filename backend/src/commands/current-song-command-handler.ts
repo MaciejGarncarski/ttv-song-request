@@ -1,7 +1,5 @@
-import { CommandHandler, Deps } from "@/commands/command";
-import { playbackManager } from "@/core/playback-manager";
+import { CommandHandler, ExecuteParams } from "@/commands/command";
 import { formatDuration } from "@/helpers/format-duration";
-import { TwitchWSMessage } from "@/types/twitch-ws-message";
 
 export class CurrentSongCommandHandler extends CommandHandler {
   private readonly regex = /^!song\s*$/i;
@@ -10,12 +8,10 @@ export class CurrentSongCommandHandler extends CommandHandler {
     return this.regex.test(messageText);
   }
 
-  async execute(
-    parsedMessage: TwitchWSMessage,
-    { songQueue, logger, sendChatMessage }: Deps
-  ) {
-    const messageId = parsedMessage.payload.event?.message_id;
-
+  async execute({
+    deps: { songQueue, logger, sendChatMessage, playbackManager },
+    messageId,
+  }: ExecuteParams) {
     if (songQueue.isEmpty()) {
       logger.info(`[COMMAND] [SKIP] Queue is empty, skipping not possible.`);
       await sendChatMessage(`Kolejka jest pusta.`, messageId);

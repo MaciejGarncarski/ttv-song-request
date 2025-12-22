@@ -1,5 +1,4 @@
-import { CommandHandler, Deps } from "@/commands/command";
-import { TwitchWSMessage } from "@/types/twitch-ws-message";
+import { CommandHandler, ExecuteParams } from "@/commands/command";
 import { formatDuration } from "@/helpers/format-duration";
 import z from "zod";
 import { getVideoMetadata, SongMetadata } from "@/data/get-video-metadata";
@@ -15,11 +14,12 @@ export class YoutubeSrHandler extends CommandHandler {
     return this.regex.test(messageText);
   }
 
-  async execute(
-    parsedMessage: TwitchWSMessage,
-    { songQueue, logger, sendChatMessage }: Deps
-  ) {
-    const messageText = parsedMessage.payload.event?.message?.text;
+  async execute({
+    deps: { logger, songQueue, sendChatMessage },
+    payload,
+    messageId,
+  }: ExecuteParams) {
+    const messageText = payload.event?.message?.text;
     const messageMatch = messageText?.match(this.regex);
 
     if (!messageMatch || !messageText) {
@@ -28,8 +28,7 @@ export class YoutubeSrHandler extends CommandHandler {
 
     const userInput = messageMatch[1];
     const isYoutubeLink = this.ytLinkRegex.test(userInput);
-    const messageId = parsedMessage.payload.event?.message_id;
-    const user = parsedMessage.payload.event?.chatter_user_name;
+    const user = payload.event?.chatter_user_name;
 
     if (!user) {
       throw new Error("Not matching SR command or missing user/messageId.");

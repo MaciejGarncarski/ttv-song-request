@@ -1,7 +1,6 @@
-import { CommandHandler, Deps } from "@/commands/command";
+import { CommandHandler, ExecuteParams } from "@/commands/command";
 import { checkIsMod } from "@/helpers/check-is-mod";
 import { CommandError, CommandErrorCode } from "@/types/errors";
-import { TwitchWSMessage } from "@/types/twitch-ws-message";
 
 export class PlayCommandHandler extends CommandHandler {
   private readonly regex = /^!play\s*$/i;
@@ -10,12 +9,7 @@ export class PlayCommandHandler extends CommandHandler {
     return this.regex.test(messageText);
   }
 
-  async execute(
-    parsedMessage: TwitchWSMessage,
-    { logger, playbackManager }: Deps
-  ) {
-    const payload = parsedMessage.payload;
-
+  async execute({ deps: { logger, playbackManager }, payload }: ExecuteParams) {
     if (!payload.event) {
       throw new Error("No event found in payload.");
     }
