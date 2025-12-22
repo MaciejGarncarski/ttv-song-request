@@ -6,7 +6,6 @@ import { AnimatePresence } from 'motion/react'
 import { CurrentSong } from '@/components/current-song'
 import { Queue } from '@/components/queue'
 import { PlayerYT } from '@/components/player-yt'
-import { BackgroundWakeLock } from '@/components/bg-wake-lock'
 import { usePlayerData } from '@/hooks/use-player-data'
 import { useQueue } from '@/hooks/use-queue'
 import { QueueEmptyMessage } from '@/components/queue-empty-message'
@@ -64,7 +63,6 @@ function App() {
           setIsReady={setIsReady}
         />
       )}
-      <BackgroundWakeLock />
     </div>
   )
 }

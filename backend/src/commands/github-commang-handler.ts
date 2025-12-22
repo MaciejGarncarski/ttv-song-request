@@ -1,21 +1,24 @@
-import { CommandHandler, Deps } from "@/commands/command";
-import { logger } from "@/helpers/logger";
-import { TwitchWSMessage } from "@/types/twitch-ws-message";
+import { CommandHandler, ExecuteParams } from '@/commands/command'
+import { logger } from '@/helpers/logger'
+import { RateLimitConfig } from '@/helpers/rate-limit'
 
 export class GithubCommandHandler extends CommandHandler {
-  private readonly regex = /^!github\b/i;
+  private readonly regex = /^!github\b/i
 
-  canHandle(messageText: string): boolean {
-    return this.regex.test(messageText);
+  rateLimit: RateLimitConfig = {
+    windowMs: 30000,
+    max: 2,
   }
 
-  async execute(parsedMessage: TwitchWSMessage, { sendChatMessage }: Deps) {
-    const messageId = parsedMessage.payload.event?.message_id;
+  canHandle(messageText: string): boolean {
+    return this.regex.test(messageText)
+  }
 
-    logger.info(`[COMMAND] [GITHUB] Sending GitHub repository link.`);
+  async execute({ deps: { sendChatMessage }, messageId }: ExecuteParams) {
+    logger.info(`[COMMAND] [GITHUB] Sending GitHub repository link.`)
     await sendChatMessage(
-      "Link do repozytorium: https://github.com/maciejgarncarski/twitch-chat-bot",
-      messageId
-    );
+      'Link do repozytorium: https://github.com/maciejgarncarski/twitch-chat-bot',
+      messageId,
+    )
   }
 }

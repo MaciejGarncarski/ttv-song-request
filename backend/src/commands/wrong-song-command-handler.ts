@@ -1,49 +1,50 @@
-import { CommandHandler, Deps } from "@/commands/command";
-import { TwitchWSMessage } from "@/types/twitch-ws-message";
+import { CommandHandler, ExecuteParams } from '@/commands/command'
+import { RateLimitConfig } from '@/helpers/rate-limit'
 
 export class WrongSongCommandHandler extends CommandHandler {
-  private readonly regexp = /^!wrongsong\b/i;
+  private readonly regexp = /^!wrongsong\b/i
 
-  public canHandle(message: string): boolean {
-    return this.regexp.test(message);
+  rateLimit: RateLimitConfig = {
+    windowMs: 15000,
+    max: 1,
   }
 
-  async execute(
-    parsedMessage: TwitchWSMessage,
-    { logger, sendChatMessage, songQueue, playbackManager }: Deps
-  ) {
+  public canHandle(message: string): boolean {
+    return this.regexp.test(message)
+  }
+
+  async execute({
+    deps: { logger, songQueue, sendChatMessage, playbackManager },
+    payload,
+    messageId,
+  }: ExecuteParams) {
     const foundSoung = songQueue
       .getQueue()
-      .findLast(
-        (item) =>
-          item.username === parsedMessage.payload.event?.chatter_user_name
-      );
+      .findLast((item) => item.username === payload.event?.chatter_user_name)
 
     if (!foundSoung) {
       logger.info(
-        `[COMMAND] [WRONGSONG] No song found for user ${parsedMessage.payload.event?.chatter_user_login}.`
-      );
-      return;
+        `[COMMAND] [WRONGSONG] No song found for user ${payload.event?.chatter_user_login}.`,
+      )
+      return
     }
-
-    const messageId = parsedMessage.payload.event?.message_id;
 
     if (playbackManager.getCurrentSongId() === foundSoung.id) {
       logger.info(
-        `[COMMAND] [WRONGSONG] User ${parsedMessage.payload.event?.chatter_user_login} tried to skip currently playing song, which is not allowed.`
-      );
+        `[COMMAND] [WRONGSONG] User ${payload.event?.chatter_user_login} tried to skip currently playing song, which is not allowed.`,
+      )
       await sendChatMessage(
-        `@${parsedMessage.payload.event?.chatter_user_login} Nie możesz pominąć odtwarzanego utworu.`,
-        messageId
-      );
+        `@${payload.event?.chatter_user_login} Nie możesz pominąć odtwarzanego utworu.`,
+        messageId,
+      )
 
-      return;
+      return
     }
 
-    songQueue.removeSongById(foundSoung.id);
+    songQueue.removeSongById(foundSoung.id)
     logger.info(
-      `[COMMAND] [WRONGSONG] Removed song with ID ${foundSoung.id} for user ${parsedMessage.payload.event?.chatter_user_login}.`
-    );
-    await sendChatMessage(`Usunięto z kolejki.`, messageId);
+      `[COMMAND] [WRONGSONG] Removed song with ID ${foundSoung.id} for user ${payload.event?.chatter_user_login}.`,
+    )
+    await sendChatMessage(`Usunięto z kolejki.`, messageId)
   }
 }
