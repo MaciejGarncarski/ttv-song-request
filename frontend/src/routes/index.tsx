@@ -54,7 +54,7 @@ function App() {
         {isLoading || queueData?.length === 0 ? null : <Queue />}
       </AnimatePresence>
 
-      {currentSong && songId && (
+      {currentSong && songId === currentSong.id && (
         <PlayerYT
           isReady={isReady}
           volume={volume}

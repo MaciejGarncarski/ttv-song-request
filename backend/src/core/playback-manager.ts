@@ -1,9 +1,22 @@
+import { EventEmitter } from 'node:events'
+
 import { getBunServer } from '@/helpers/init-ws'
 import { logger } from '@/helpers/logger'
-import type { ISongQueue } from '@/types/core-interfaces'
 import { playbackStatusWSSchema } from '@/types/playback-status-ws'
 
-export class PlaybackManager {
+export interface IPlaybackManager extends EventEmitter {
+  play(): void
+  pause(): void
+  stop(): void
+  setSong(songId: string | null, duration: number): void
+  getPlayTime(): number
+  getVolume(): number
+  setVolume(volume: number): void
+
+  on(event: 'song-ended', listener: () => void): this
+}
+
+export class PlaybackManager extends EventEmitter implements IPlaybackManager {
   private isPlaying: boolean = false
   private volume: number = 20
   private playTime: number = 0
@@ -11,9 +24,9 @@ export class PlaybackManager {
   private intervalId: NodeJS.Timeout | null = null
   private songId: string | null = null
   private currentSongDuration: number = 0
-  private songQueue: ISongQueue | null = null
 
   constructor() {
+    super()
     this.startHeartbeat()
   }
 
@@ -28,7 +41,7 @@ export class PlaybackManager {
       this.currentSongDuration > 0 &&
       currentPlayTime >= this.currentSongDuration
     ) {
-      this.handleSongEnd()
+      this.emit('song-ended')
       return
     }
 
@@ -56,11 +69,7 @@ export class PlaybackManager {
     this.intervalId = setInterval(() => this.broadcastStatus(), 1000)
   }
 
-  public setSongQueue(queue: ISongQueue) {
-    this.songQueue = queue
-  }
-
-  public setSong(songId: string, duration: number) {
+  public setSong(songId: string | null, duration: number) {
     this.songId = songId
     this.currentSongDuration = duration
     this.playTime = 0
@@ -69,12 +78,12 @@ export class PlaybackManager {
     }
   }
 
-  getPlayTime() {
+  public getPlayTime() {
     if (!this.isPlaying || this.startedAt === null) return this.playTime
     return Math.floor((Date.now() - this.startedAt) / 1000)
   }
 
-  play() {
+  public play() {
     if (this.isPlaying) return
 
     this.isPlaying = true
@@ -82,7 +91,7 @@ export class PlaybackManager {
     this.broadcastStatus()
   }
 
-  pause() {
+  public pause() {
     if (!this.isPlaying) return
 
     this.playTime = this.getPlayTime()
@@ -91,23 +100,15 @@ export class PlaybackManager {
     this.broadcastStatus()
   }
 
-  setVolume(volume: number) {
+  public getVolume(): number {
+    return this.volume
+  }
+
+  public setVolume(volume: number) {
     this.volume = Math.min(Math.max(volume, 0), 100)
   }
 
-  handleSongEnd() {
-    logger.info('[PLAYBACK] Current song finished.')
-    const nextSong = this.songQueue?.next()
-
-    if (nextSong) {
-      this.setSong(nextSong.id, nextSong.duration)
-      this.play()
-    } else {
-      this.stop()
-    }
-  }
-
-  stop() {
+  public stop() {
     this.isPlaying = false
     this.playTime = 0
     this.startedAt = null

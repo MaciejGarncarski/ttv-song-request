@@ -12,7 +12,10 @@ export function usePlayerData() {
     },
   )
 
-  const parsedPlaybackData = playbackStatusWSSchema.safeParse(lastJsonMessage)
+  const parsedPlaybackData = useMemo(
+    () => playbackStatusWSSchema.safeParse(lastJsonMessage),
+    [lastJsonMessage],
+  )
 
   const playbackData = useMemo(
     () => (parsedPlaybackData.success ? parsedPlaybackData.data : null),

@@ -1,16 +1,16 @@
 import { sendChatMessage } from '@/api/send-chat-message'
-import { PlaybackManager } from '@/core/playback-manager'
-import { SongQueue } from '@/core/song-queue'
+import { IPlaybackManager } from '@/core/playback-manager'
+import { ISongQueue } from '@/core/song-queue'
 import { VoteManager } from '@/core/vote-manager'
 import { logger } from '@/helpers/logger'
 import { RateLimitConfig } from '@/helpers/rate-limit'
 import { TwitchMessagePayload } from '@/types/twitch-ws-message'
 
 export type Deps = {
-  songQueue: SongQueue
+  songQueue: ISongQueue
   voteManager: VoteManager
   logger: typeof logger
-  playbackManager: PlaybackManager
+  playbackManager: IPlaybackManager
   sendChatMessage: typeof sendChatMessage
 }
 
