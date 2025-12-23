@@ -9,7 +9,7 @@ import { PlayerYT } from '@/components/player-yt'
 import { usePlayerData } from '@/hooks/use-player-data'
 import { useQueue } from '@/hooks/use-queue'
 import { QueueEmptyMessage } from '@/components/queue-empty-message'
-import { QueueLoadingMessage } from '@/components/quque-loading-message'
+import { QueueLoadingMessage } from '@/components/queue-loading-message'
 
 export const Route = createFileRoute('/')({
   component: App,
