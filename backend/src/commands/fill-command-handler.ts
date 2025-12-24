@@ -1,7 +1,7 @@
 import { YTNodes } from 'youtubei.js/agnostic'
 
 import { CommandHandler, ExecuteParams } from '@/commands/command'
-import { MAX_VIDEO_DURATION_SECONDS } from '@/config/video'
+import { MAX_VIDEO_DURATION_SECONDS, MIN_VIDEO_DURATION_SECONDS } from '@/config/video'
 import { SongMetadata } from '@/data/get-video-metadata'
 import { innertube } from '@/data/innertube'
 
@@ -27,7 +27,7 @@ export class FillCommandHandler extends CommandHandler {
     }
 
     const query = match[1]
-    const songs = await this.searchSongsByKeywords(query.split(/\s+/))
+    const songs = await this.searchSongsByKeywords(query)
 
     const shuffledSongs = [...songs]
 
@@ -68,8 +68,8 @@ export class FillCommandHandler extends CommandHandler {
     )
   }
 
-  private async searchSongsByKeywords(keywords: string[]): Promise<FillSong[]> {
-    const results = await innertube.search(keywords.join(' '), {
+  private async searchSongsByKeywords(query: string): Promise<FillSong[]> {
+    const results = await innertube.search(query, {
       type: 'video',
     })
 
@@ -77,7 +77,11 @@ export class FillCommandHandler extends CommandHandler {
       .filter((video): video is YTNodes.Video => video.type === 'Video')
       .filter((video) => {
         const duration = video.duration?.seconds
-        return duration && duration <= MAX_VIDEO_DURATION_SECONDS
+        return (
+          duration &&
+          duration <= MAX_VIDEO_DURATION_SECONDS &&
+          duration >= MIN_VIDEO_DURATION_SECONDS
+        )
       })
       .slice(0, 20)
       .map((video): { metadata: SongMetadata; videoId: string } => {
