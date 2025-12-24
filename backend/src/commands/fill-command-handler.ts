@@ -29,7 +29,13 @@ export class FillCommandHandler extends CommandHandler {
     const query = match[1]
     const songs = await this.searchSongsByKeywords(query.split(/\s+/))
 
-    const shuffledSongs = songs.sort(() => Math.random() - 0.5)
+    const shuffledSongs = [...songs]
+
+    for (let i = shuffledSongs.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[shuffledSongs[i], shuffledSongs[j]] = [shuffledSongs[j], shuffledSongs[i]]
+    }
+
     const songsToAdd = shuffledSongs.slice(0, queueSlotsAvailable)
 
     if (songsToAdd.length === 0) {
@@ -39,14 +45,25 @@ export class FillCommandHandler extends CommandHandler {
 
     const username = data.payload.event?.chatter_user_name || 'fill_command'
 
+    let addedCount = 0
+    let errorCount = 0
+
     for (const song of songsToAdd) {
-      await data.deps.songQueue.add({ username: username, videoId: song.videoId }, song.metadata)
+      try {
+        await data.deps.songQueue.add({ username: username, videoId: song.videoId }, song.metadata)
+        addedCount++
+      } catch (error) {
+        errorCount++
+        data.deps.logger.error(error, `[COMMAND] [FILL] Failed to add song ${song.videoId}`)
+      }
     }
 
-    data.deps.logger.info(`[COMMAND] [FILL] Added ${songsToAdd.length} songs for query: ${query}`)
+    data.deps.logger.info(
+      `[COMMAND] [FILL] Added ${addedCount}/${songsToAdd.length} songs for query: ${query}`,
+    )
 
     await data.deps.sendChatMessage(
-      `Dodano ${songsToAdd.length} piosenek do kolejki dla: ${query}`,
+      `Dodano ${addedCount} piosenek do kolejki dla: ${query}${errorCount > 0 ? ` (${errorCount} nie udało się dodać)` : ''}`,
       data.messageId,
     )
   }

@@ -30,43 +30,54 @@ export class PlaylistCommandHandler extends CommandHandler {
       return
     }
 
-    try {
-      const playlistId = await this.resolvePlaylistId(query)
+    const playlistId = await this.resolvePlaylistId(query)
 
-      if (!playlistId) {
-        await deps.sendChatMessage(`Nie znaleziono playlisty dla zapytania: "${query}"`, messageId)
-        return
-      }
+    if (!playlistId) {
+      await deps.sendChatMessage(`Nie znaleziono playlisty dla zapytania: "${query}"`, messageId)
+      return
+    }
 
-      const videos = await this.fetchPlaylistVideos(playlistId, queueSlotsAvailable)
+    const videos = await this.fetchPlaylistVideos(playlistId, queueSlotsAvailable)
 
-      if (videos.length === 0) {
-        await deps.sendChatMessage(
-          `Ta playlista jest pusta lub nie zawiera odpowiednich utworów.`,
-          messageId,
-        )
-        return
-      }
-
-      const username = payload.event?.chatter_user_name || 'playlist_command'
-
-      for (const video of videos) {
-        await deps.songQueue.add({ username, videoId: video.videoId }, video.metadata)
-      }
-      const playlistUrl = `https://www.youtube.com/playlist?list=${playlistId}`
-
-      deps.logger.info(
-        `[COMMAND] [PLAYLIST] Added ${videos.length} songs from playlist ${playlistUrl}`,
-      )
-
+    if (videos.length === 0) {
       await deps.sendChatMessage(
-        `Dodano ${videos.length} utworów z playlisty do kolejki! ${playlistUrl}`,
+        `Ta playlista jest pusta lub nie zawiera odpowiednich utworów.`,
         messageId,
       )
-    } catch (error) {
-      deps.logger.error(error, `[COMMAND] [PLAYLIST] Error processing playlist: ${query}`)
-      await deps.sendChatMessage(`Wystąpił błąd podczas pobierania playlisty.`, messageId)
+      return
     }
+
+    const username = payload.event?.chatter_user_name || 'playlist_command'
+
+    const results = { added: 0, failed: 0, errors: [] as string[] }
+
+    for (const video of videos) {
+      try {
+        await deps.songQueue.add({ username, videoId: video.videoId }, video.metadata)
+        results.added++
+      } catch (error) {
+        results.failed++
+        deps.logger.warn(`Failed to add video ${video.videoId}: ${error}`)
+      }
+    }
+
+    if (results.added === 0) {
+      await deps.sendChatMessage(`Nie udało się dodać żadnego utworu z playlisty.`, messageId)
+      return
+    }
+
+    const playlistUrl = `https://www.youtube.com/playlist?list=${playlistId}`
+
+    deps.logger.info(
+      `[COMMAND] [PLAYLIST] Added ${results.added} songs from playlist ${playlistUrl}${results.failed > 0 ? ` (${results.failed} failed)` : ''}`,
+    )
+
+    const message =
+      results.failed > 0
+        ? `Dodano ${results.added} utworów z playlisty (${results.failed} pominięto). ${playlistUrl}`
+        : `Dodano ${results.added} utworów z playlisty do kolejki! ${playlistUrl}`
+
+    await deps.sendChatMessage(message, messageId)
   }
 
   private async resolvePlaylistId(query: string): Promise<string | null> {
@@ -84,7 +95,8 @@ export class PlaylistCommandHandler extends CommandHandler {
       }
 
       if (item.is(YTNodes.LockupView) && item.content_type === 'PLAYLIST') {
-        return (item as { content_id: string })?.content_id || null
+        const lockupItem = item as unknown as { content_id: string | null }
+        return typeof lockupItem.content_id === 'string' ? lockupItem.content_id : null
       }
     }
     return null

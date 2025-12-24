@@ -104,7 +104,7 @@ export class SongQueue extends EventEmitter implements ISongQueue {
     const newItem: QueuedItem = {
       id: validatedInput.videoId,
       username: validatedInput.username,
-      videoUrl: getVideoUrl(validatedInput.videoId),
+      videoUrl: videoUrl,
       duration: duration,
       title: title,
       thumbnail: thumbnail,

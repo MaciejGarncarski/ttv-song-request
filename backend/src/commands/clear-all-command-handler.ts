@@ -13,7 +13,7 @@ export class ClearAllCommandHandler extends CommandHandler {
       throw new CommandError(CommandErrorCode.NOT_A_MOD)
     }
 
-    await deps.songQueue.clearAll()
+    deps.songQueue.clearAll()
     deps.logger.info(`[COMMAND] [CLEARALL] Cleared the song queue.`)
 
     await deps.sendChatMessage(`Kolejka piosenek została wyczyszczona.`, messageId)

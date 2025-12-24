@@ -81,3 +81,5 @@ export const songRequestEngine = new SongRequestEngine(
   new VoteManager(),
   new PlaybackManager(),
 )
+
+songRequestEngine.setupEventListeners()
