@@ -22,6 +22,7 @@ export interface ISongQueue extends EventEmitter {
   peekNext(): QueuedItem | null
   getAvailableSlots(): number
   clearAll(): void
+  findPositionInQueue(songId: string): number | null
 
   on(event: 'song-queued', listener: (item: QueuedItem) => void): this
   on(event: 'clear-queue', listener: () => void): this
@@ -100,8 +101,6 @@ export class SongQueue extends EventEmitter implements ISongQueue {
       throw new QueueError('TOO_LONG')
     }
 
-    const position = this.queue.length + 1
-
     const newItem: QueuedItem = {
       id: validatedInput.videoId,
       username: validatedInput.username,
@@ -110,7 +109,6 @@ export class SongQueue extends EventEmitter implements ISongQueue {
       title: title,
       thumbnail: thumbnail,
       requestedAt: new Date(),
-      position: position,
     }
 
     this.queue.push(newItem)
@@ -161,6 +159,11 @@ export class SongQueue extends EventEmitter implements ISongQueue {
 
   public getAvailableSlots(): number {
     return this.maxQueueLength - this.queue.length
+  }
+
+  public findPositionInQueue(songId: string): number | null {
+    const index = this.queue.findIndex((item) => item.id === songId)
+    return index !== -1 ? index + 1 : null
   }
 
   public clearAll(): void {
