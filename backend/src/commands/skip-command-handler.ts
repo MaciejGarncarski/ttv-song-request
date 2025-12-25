@@ -30,8 +30,11 @@ export class SkipCommandHandler extends CommandHandler {
       throw new CommandError(CommandErrorCode.EVENT_NOT_FOUND)
     }
 
-    if (!isMod) {
-      throw new CommandError(CommandErrorCode.NOT_A_MOD)
+    const isAddedByRequestingUser =
+      songQueue.getCurrent()?.username === payload.event.chatter_user_name
+
+    if (!isAddedByRequestingUser && !isMod) {
+      throw new CommandError(CommandErrorCode.CANNOT_SKIP_SONG)
     }
 
     const user = payload.event?.chatter_user_name

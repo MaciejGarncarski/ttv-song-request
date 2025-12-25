@@ -18,18 +18,18 @@ export class WrongSongCommandHandler extends CommandHandler {
     payload,
     messageId,
   }: ExecuteParams) {
-    const foundSoung = songQueue
+    const foundSong = songQueue
       .getQueue()
       .findLast((item) => item.username === payload.event?.chatter_user_name)
 
-    if (!foundSoung) {
+    if (!foundSong) {
       logger.info(
         `[COMMAND] [WRONGSONG] No song found for user ${payload.event?.chatter_user_login}.`,
       )
       return
     }
 
-    if (songQueue.getCurrentSongId() === foundSoung.id) {
+    if (songQueue.getCurrentSongId() === foundSong.id) {
       logger.info(
         `[COMMAND] [WRONGSONG] User ${payload.event?.chatter_user_login} tried to skip currently playing song, which is not allowed.`,
       )
@@ -41,9 +41,9 @@ export class WrongSongCommandHandler extends CommandHandler {
       return
     }
 
-    songQueue.removeById(foundSoung.id)
+    songQueue.removeById(foundSong.id)
     logger.info(
-      `[COMMAND] [WRONGSONG] Removed song with ID ${foundSoung.id} for user ${payload.event?.chatter_user_login}.`,
+      `[COMMAND] [WRONGSONG] Removed song with ID ${foundSong.id} for user ${payload.event?.chatter_user_login}.`,
     )
     await sendChatMessage(`Usunięto z kolejki.`, messageId)
   }

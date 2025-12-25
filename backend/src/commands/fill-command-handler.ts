@@ -83,7 +83,6 @@ export class FillCommandHandler extends CommandHandler {
           duration >= MIN_VIDEO_DURATION_SECONDS
         )
       })
-      .slice(0, 20)
       .map((video): { metadata: SongMetadata; videoId: string } => {
         const metadata: SongMetadata = {
           duration: video.duration?.seconds || 0,

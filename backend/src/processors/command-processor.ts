@@ -108,6 +108,10 @@ class CommandProcessor {
       } catch (error) {
         if (error instanceof CommandError) {
           switch (error.code) {
+            case CommandErrorCode.CANNOT_SKIP_SONG:
+              await sendChatMessage('Nie możesz pominąć tego utworu.', messageId)
+              break
+
             case CommandErrorCode.NOT_A_MOD:
               await sendChatMessage('Tylko moderatorzy mogą używać tej komendy.', messageId)
               break
