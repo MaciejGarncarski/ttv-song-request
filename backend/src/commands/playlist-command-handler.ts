@@ -4,10 +4,16 @@ import { CommandHandler, ExecuteParams } from '@/commands/command'
 import { MAX_VIDEO_DURATION_SECONDS } from '@/config/video'
 import { SongMetadata } from '@/data/get-video-metadata'
 import { innertube } from '@/data/innertube'
+import { RateLimitConfig } from '@/helpers/rate-limit'
 
 export class PlaylistCommandHandler extends CommandHandler {
   private readonly regex = /^!playlist\s+(.+)$/i
   private readonly urlRegex = /[?&]list=([^#\&\?]+)/
+
+  rateLimit: RateLimitConfig = {
+    windowMs: 5000,
+    max: 3,
+  }
 
   public canHandle(messageText: string): boolean {
     return this.regex.test(messageText)
