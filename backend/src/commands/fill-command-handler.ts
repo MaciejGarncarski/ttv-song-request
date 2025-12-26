@@ -4,9 +4,15 @@ import { CommandHandler, ExecuteParams } from '@/commands/command'
 import { MAX_VIDEO_DURATION_SECONDS, MIN_VIDEO_DURATION_SECONDS } from '@/config/video'
 import { SongMetadata } from '@/data/get-video-metadata'
 import { innertube } from '@/data/innertube'
+import { RateLimitConfig } from '@/helpers/rate-limit'
 
 export class FillCommandHandler extends CommandHandler {
   private readonly regex = /^!fill\s+(.+)$/i
+
+  rateLimit: RateLimitConfig = {
+    windowMs: 5000,
+    max: 3,
+  }
 
   public canHandle(messageText: string): boolean {
     return this.regex.test(messageText)

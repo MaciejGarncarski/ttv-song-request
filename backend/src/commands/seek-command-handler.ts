@@ -1,8 +1,14 @@
 import { CommandHandler, ExecuteParams } from '@/commands/command'
+import { RateLimitConfig } from '@/helpers/rate-limit'
 import { CommandError, CommandErrorCode } from '@/types/errors'
 
 export class SeekCommandHandler extends CommandHandler {
   private readonly regex = /^!seek\s+(?:(\d{1,2}):([0-5]?\d)|(\d{1,3}))$/
+
+  rateLimit: RateLimitConfig = {
+    windowMs: 5000,
+    max: 3,
+  }
 
   public canHandle(command: string): boolean {
     return this.regex.test(command)

@@ -1,8 +1,14 @@
 import { CommandHandler, ExecuteParams } from '@/commands/command'
+import { RateLimitConfig } from '@/helpers/rate-limit'
 import { CommandError, CommandErrorCode } from '@/types/errors'
 
 export class ClearAllCommandHandler extends CommandHandler {
   private readonly regex = /^!clearall\s*$/i
+
+  rateLimit: RateLimitConfig = {
+    windowMs: 5000,
+    max: 3,
+  }
 
   public canHandle(messageText: string): boolean {
     return this.regex.test(messageText)

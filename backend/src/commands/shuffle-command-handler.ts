@@ -1,8 +1,14 @@
 import { CommandHandler, ExecuteParams } from '@/commands/command'
+import { RateLimitConfig } from '@/helpers/rate-limit'
 import { CommandError, CommandErrorCode } from '@/types/errors'
 
 export class ShuffleCommandHandler extends CommandHandler {
   private readonly regex = /^!shuffle$/
+
+  rateLimit: RateLimitConfig = {
+    windowMs: 5000,
+    max: 3,
+  }
 
   public canHandle(command: string): boolean {
     return this.regex.test(command)
