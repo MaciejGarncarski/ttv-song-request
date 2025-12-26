@@ -23,6 +23,8 @@ export interface ISongQueue extends EventEmitter {
   getAvailableSlots(): number
   clearAll(): void
   findPositionInQueue(songId: string): number | null
+  getAtPosition(position: number): QueuedItem | null
+  shuffle(): void
 
   on(event: 'song-queued', listener: (item: QueuedItem) => void): this
   on(event: 'clear-queue', listener: () => void): this
@@ -132,6 +134,20 @@ export class SongQueue extends EventEmitter implements ISongQueue {
     this.emit('song-remove-current', currentItem)
 
     return currentItem
+  }
+
+  public shuffle(): void {
+    for (let i = this.queue.length - 1; i > 1; i--) {
+      const j = Math.floor(Math.random() * (i - 1)) + 1
+      ;[this.queue[i], this.queue[j]] = [this.queue[j], this.queue[i]]
+    }
+  }
+
+  public getAtPosition(position: number): QueuedItem | null {
+    if (position < 0 || position >= this.queue.length) {
+      return null
+    }
+    return this.queue[position]
   }
 
   public removeById(songId: string) {
