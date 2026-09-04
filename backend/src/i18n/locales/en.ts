@@ -123,7 +123,7 @@ export const en: TranslationSchema = {
       removed: 'Removed "{title}" from position {position}.',
     },
     frontend: {
-      link: "UI: https://bot.maciej-garncarski.pl/",
+      link: "UI: https://bot.maciejg.dev/",
     },
     sr: {
       added: `@{username}, added {title} to the queue at position {position}. Playing {playTime}. {link}`,
