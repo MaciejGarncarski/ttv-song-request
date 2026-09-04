@@ -27,7 +27,7 @@ describe("FrontendCommandHandler", () => {
       const ctx = createMockContext()
       await handler.execute(ctx)
       expect(ctx.deps.sendChatMessage).toHaveBeenCalledWith(
-        "UI: https://bot.maciejg.dev/",
+        "UI: https://bot.maciejg.dev",
         ctx.messageId,
       )
       expect(ctx.deps.sendChatMessage).toHaveBeenCalledTimes(1)

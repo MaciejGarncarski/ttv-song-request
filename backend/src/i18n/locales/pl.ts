@@ -123,7 +123,7 @@ export const pl = {
       removed: 'Usunięto utwór "{title}" z pozycji {position}.',
     },
     frontend: {
-      link: "UI: https://bot.maciejg.dev/",
+      link: "UI: https://bot.maciejg.dev",
     },
     sr: {
       added: `@{username}, dodano {title} do kolejki na miejscu {position}. Odtwarzanie {playTime}. {link}`,
